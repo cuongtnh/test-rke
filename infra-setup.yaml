@@ -1,0 +1,180 @@
+#
+# All Rights Reserved. Copyright (C) 2020, Hitachi, Ltd.
+#
+---
+- hosts: all
+  gather_facts: no
+  vars_files:
+    - vars/main.yaml
+  remote_user: "{{ remote_user }}"
+  become: yes
+  become_method: sudo
+
+  tasks:
+
+  - name: 1. Add user {{ racher_user }} to remote machine
+    racher_user:
+         name={{ racher_user }}
+         password={{ rancher_password | password_hash('sha512') }}
+
+  - name: 2. Change Expire Password Account to never
+    command: chage -E -1 {{ racher_user }}
+
+  - name: 3. Add {{ racher_user }} user to sudoers
+    lineinfile:
+         "dest=/etc/sudoers
+         regexp='^remote ALL'
+         line='{{ racher_user }} ALL=(ALL) NOPASSWD: ALL'
+         state=present"
+
+  - name: 4. Create SSH directory
+    file:
+      path: "/home/{{ racher_user }}/.ssh"
+      state: directory
+
+  - name: 5. Create empty file for ssh keys
+    file:
+      path: "/home/{{ racher_user }}/.ssh/authorized_keys"
+      state: touch
+
+  - name: 6. Install ssh key
+    authorized_key: user={{ racher_user }}
+                    key={{ lookup('file', lookup('env','HOME') +  '/.ssh/id_rsa.pub') }}
+                    state=present
+
+  - name: 7. Install yum utilities
+    yum:
+      name: yum-utils
+      state: latest
+
+  - name: 8. Install device-mapper-persistent-data
+    yum:
+      name: device-mapper-persistent-data
+      state: latest
+
+  - name: 9. Install lvm2
+    yum:
+      name: lvm2
+      state: latest
+
+  - name: 10. Add Docker repo
+    get_url:
+      url: https://download.docker.com/linux/centos/docker-ce.repo
+      dest: /etc/yum.repos.d/docer-ce.repo
+
+  - name: 11. Install Docker
+    package:
+      name: "{{ item }}"
+      state: latest
+    with_items: "{{ docker_utils }}"
+
+  - name: 12. Start Docker service
+    service:
+      name: docker
+      state: started
+      enabled: yes
+
+  - name: 13. Add "{{racher_user}}"  to docker group
+    user:
+      name: "{{ racher_user }}"
+      groups: docker
+      append: yes
+
+  - name: 14. Disable swap for kubernetes
+    command: swapoff -a
+
+  - name: 15. Disable swap permanently
+    replace:
+      path: /etc/fstab
+      regexp: '^(\s*)([^#\n]+\s+)(\w+\s+)swap(\s+.*)$'
+      replace: '#\1\2\3swap\4'
+      backup: yes
+
+  - name: 16. Update the sysctl configuration
+    sysctl:
+      name: '{{ item.key }}'
+      value: '{{ item.value }}'
+      sysctl_set: yes
+      state: present
+      reload: yes
+    with_items: "{{ sysctl_config }}"
+
+  - name: 17. Install firewalld
+    yum:
+      name: firewalld
+      state: latest
+
+  - name: 18. Enable firewalld
+    service: name=firewalld state=started enabled=yes
+
+  - name: 19. Flush IPtables
+    command: iptables -t filter -F
+
+  - name: 20. Cleanup chain
+    command: iptables -t filter -X
+
+  - name: 21. Restart docker service
+    command: systemctl restart docker
+
+  - name: 22. Ports configuration for Worker node(s)
+    firewalld:
+      port: "{{ item }}"
+      permanent: yes
+      state: enabled
+    with_items: "{{ worker_ports }}"
+    when: " 'worker_nodes' in group_names"
+
+  - name: 23. Ports configuration for Master node(s)
+    firewalld:
+      port: "{{ item }}"
+      permanent: yes
+      state: enabled
+    with_items: "{{ master_ports }}"
+    when: " 'master_nodes' in group_names"
+
+  - name: 24. update SSHD configuration
+    lineinfile: dest=/etc/ssh/sshd_config regexp='^#?AllowTcpForwarding' line='AllowTcpForwarding yes'
+
+  - name: 25. Install helm binary on controller node
+    run_once: true
+    unarchive:
+      src: https://get.helm.sh/{{ helm_version }}-linux-amd64.tar.gz
+      dest: /tmp
+      creates: /usr/local/bin/helm
+      remote_src: yes
+    delegate_to: localhost
+
+  - name: 26. Move helm binary into binary path.
+    run_once: true
+    command: >
+      cp /tmp/linux-amd64/helm /usr/local/bin/helm
+      creates=/usr/local/bin/helm
+    delegate_to: localhost
+
+  - name: 27. Install kubectl binary on controller node
+    run_once: true
+    get_url:
+      url: https://storage.googleapis.com/kubernetes-release/release/{{ kubectl_version }}/bin/linux/amd64/kubectl
+      dest: /usr/local/bin/kubectl
+      mode: '0755'
+    delegate_to: localhost
+
+  - name: 28. Install RKE to controller machine
+    run_once: true
+    get_url:
+      url: https://github.com/rancher/rke/releases/download/{{ rke_version }}/rke_linux-amd64
+      dest: /usr/local/bin/rke
+      mode: '0755'
+    delegate_to: localhost
+
+
+  - name: 29. Install RKE kernal modules
+    modprobe:
+        name: "{{ item }}"
+        state: present
+    with_items: "{{ kernel_modules }}"
+
+  - name: 30. Install ceph-common package for External ceph storage
+    yum:
+      name: ceph-common
+      state: latest

@@ -1,0 +1,85 @@
+#
+# All Rights Reserved. Copyright (C) 2020, Hitachi, Ltd.
+#
+# remote machine user id enabled with passwordless ssh
+remote_user: centos
+racher_user: rkeuser
+rancher_password: password
+
+# Versions of KUBECTL, HELM and RKE
+helm_version: helm-v3.1.1
+kubectl_version: v1.18.1
+rke_version: v1.1.15 
+
+# docker utils
+
+docker_utils:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+
+# syctl config for k8s 
+
+sysctl_config:
+  - {key: net.bridge.bridge-nf-call-ip6tables, value: 1}
+  - {key: net.bridge.bridge-nf-call-iptables,  value: 1}
+  - {key: net.ipv4.ip_forward,  value: 1}
+
+# Ports required for K8s Master nodes
+
+master_ports:
+  -  22/tcp
+  -  6443/tcp
+  -  2376/tcp
+  -  2379-2380/tcp
+  -  8472/udp
+  -  9099/udp
+  -  10250-10252/tcp
+  -  80/tcp
+  -  443/tcp
+
+# Port required for K8s Worker nodes
+
+worker_ports:
+  -  22/tcp
+  -  10250/tcp
+  -  8472/tcp
+  -  30000-32767/tcp
+  -  80/tcp
+  -  443/tcp
+
+
+# Kernal modules required for RKE
+
+kernel_modules:
+  - br_netfilter
+  - ip6_udp_tunnel
+  - ip_set
+  - ip_set_hash_ip
+  - ip_set_hash_net
+  - iptable_filter
+  - iptable_nat
+  - iptable_mangle
+  - iptable_raw
+  - nf_conntrack_netlink
+  - nf_conntrack
+  - nf_conntrack_ipv4
+  - nf_defrag_ipv4
+  - nf_nat
+  - nf_nat_ipv4
+  - nf_nat_masquerade_ipv4
+  - nfnetlink
+  - udp_tunnel
+  - veth
+  - vxlan
+  - x_tables
+  - xt_addrtype
+  - xt_conntrack
+  - xt_comment
+  - xt_mark
+  - xt_multiport
+  - xt_nat
+  - xt_recent
+  - xt_set
+  - xt_statistic
+  - xt_tcpudp

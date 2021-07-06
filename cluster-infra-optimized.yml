@@ -1,0 +1,161 @@
+# If you intened to deploy Kubernetes in an air-gapped environment,
+# please consult the documentation on how to configure custom RKE images.
+nodes:
+- address: 172.0.2.235
+  port: "22"
+  internal_address: ""
+  role:
+  - controlplane
+  - worker
+  - etcd
+  hostname_override: ip-172-0-2-235.ap-northeast-1.compute.internal
+  user: rancher
+  docker_socket: /var/run/docker.sock
+  ssh_key: ""
+  ssh_key_path: ~/.ssh/id_rsa
+  ssh_cert: ""
+  ssh_cert_path: ""
+  labels: {}
+services:
+  etcd:
+    image: ""
+    extra_args: {}
+    extra_binds: []
+    extra_env: []
+    external_urls: []
+    ca_cert: ""
+    cert: ""
+    key: ""
+    path: ""
+    snapshot: null
+    retention: ""
+    creation: ""
+    backup_config: null
+  kube-api:
+    image: ""
+    extra_args: {}
+    extra_binds: []
+    extra_env: []
+    service_cluster_ip_range: 10.43.0.0/16
+    service_node_port_range: ""
+    pod_security_policy: false
+    always_pull_images: false
+  kube-controller:
+    image: ""
+    extra_args: {}
+    extra_binds: []
+    extra_env: []
+    cluster_cidr: 10.42.0.0/16
+    service_cluster_ip_range: 10.43.0.0/16
+  scheduler:
+    image: ""
+    extra_args: {}
+    extra_binds: []
+    extra_env: []
+  kubelet:
+    image: ""
+    extra_args: {}
+    extra_binds: []
+    extra_env: []
+    cluster_domain: cluster.local
+    infra_container_image: ""
+    cluster_dns_server: 10.43.0.10
+    fail_swap_on: false
+  kubeproxy:
+    image: ""
+    extra_args: {}
+    extra_binds: []
+    extra_env: []
+network:
+  plugin: canal
+  options: {}
+authentication:
+  strategy: x509
+  sans: []
+  webhook: null
+addons: |-
+  ---
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: ingress-default-cert
+    namespace: ingress-nginx
+  type: kubernetes.io/tls
+  data:
+    tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURHekNDQWdPZ0F3SUJBZ0lKQUpXK2dodGpubThMTUEwR0NTcUdTSWIzRFFFQkN3VUFNQ1F4RURBT0JnTlYKQkFNTUIyMW1hUzFyT0hNeEVEQU9CZ05WQkFvTUIyMW1hUzFyT0hNd0hoY05NakF3TkRFd01EY3dPVFV3V2hjTgpNakV3TkRFd01EY3dPVFV3V2pBa01SQXdEZ1lEVlFRRERBZHRabWt0YXpoek1SQXdEZ1lEVlFRS0RBZHRabWt0CmF6aHpNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQXV5ZHBrd0FQK3JGd1pTbUQKMHZ0SHJrT2FHd1AzNktMdldiY09WRWZpYXNiRjNRRWwrcktjTm5UZDBoazl2cVh6L0ZNelhoZ1dVZk1mQU5EUgo0NGR2NlVvRUovQzRNVmV0eExIOWVDczFsT1c2Qmx5NkhidStueEZ0UVo2TmZzWmJ2eUIxM1RDeHAzMmlWM2IwCnFDNmZWMStya09wa1lNdmp2dXc2MW5LWlBrdmU3OGZkdTlsdHdjUndzNVRSTEVBWDhFUDlvM2o4Wm5iU3ptcSsKUjJGNmpMV3RRaHkxT3lmL3pUYzUydlI1VUpINnh6VVhMcFpQaTZrS0FubWtSQWdNWDJiMitDWmlmQWFJeDJ5SgphYXZMb3VRV0tDUEV3UXh5ZjE3YStFcGcvYUhMVGt4cTRaTWNxQ2szWlIrc21TNmhZOGI0anRVUDIydU9USXZUClVFUzNtUUlEQVFBQm8xQXdUakFkQmdOVkhRNEVGZ1FVUjZBWGdyV0Z6ZHpQc3ZmWDVubGpBZk1tSXFvd0h3WUQKVlIwakJCZ3dGb0FVUjZBWGdyV0Z6ZHpQc3ZmWDVubGpBZk1tSXFvd0RBWURWUjBUQkFVd0F3RUIvekFOQmdrcQpoa2lHOXcwQkFRc0ZBQU9DQVFFQVBucjJVdTN4V2RUSDlINEgvV0NvTFdMV0FaWE9OeHZrTDBENnlLVHoyTXhiCndNYWxIRDlaa2d6U2I0K0wwSlY5SmxLcEovYXdGRkNUU1BNM3FZdXhVRC92RFBWbzFoQ0pBazRicnpmV0Zjc3AKVjF2cGttRnJuc0VkWWE1Y1hsV0NrTkRaTjRWdzF0bHhnWUE0bUVUMlBXcVBvMzcrbVJDZUtxaU13bVREU3RMcwpaNS9TUUMrMlNxT1A2TndIL2pDSHBZOXNLc3dkTVphRGtOVlFRUU1TL1k0bjBudVlWUStjcmJScEo5dzRiTGRjCmFVWjRCZnBxbE5FakxScHRNb3lmQTAycEZvNHRsMXp4Q1U5Y2dzWFFyRjl6bWNjb1hZU2N4ejBrNzJXRGhYcmUKbjAxNmg3L1VFdksyQ0szL01Oa0U4SWhXZUQ4ZVVmQ3NCdmNvNGFQamhRPT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+    tls.key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2UUlCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktjd2dnU2pBZ0VBQW9JQkFRQzdKMm1UQUEvNnNYQmwKS1lQUyswZXVRNW9iQS9mb291OVp0dzVVUitKcXhzWGRBU1g2c3B3MmROM1NHVDIrcGZQOFV6TmVHQlpSOHg4QQowTkhqaDIvcFNnUW44TGd4VjYzRXNmMTRLeldVNWJvR1hMb2R1NzZmRVcxQm5vMSt4bHUvSUhYZE1MR25mYUpYCmR2U29McDlYWDZ1UTZtUmd5K08rN0RyV2NwaytTOTd2eDkyNzJXM0J4SEN6bE5Fc1FCZndRLzJqZVB4bWR0TE8KYXI1SFlYcU10YTFDSExVN0ovL05Oem5hOUhsUWtmckhOUmN1bGsrTHFRb0NlYVJFQ0F4Zlp2YjRKbUo4Qm9qSApiSWxwcTh1aTVCWW9JOFRCREhKL1h0cjRTbUQ5b2N0T1RHcmhreHlvS1RkbEg2eVpMcUZqeHZpTzFRL2JhNDVNCmk5TlFSTGVaQWdNQkFBRUNnZ0VBTEN0S0RFcG9ld2JqZXN5SWN3T2cwQ3plTXVBRjR4NkpGSWhTVm11OHNPeUcKaC9rY2FJVTh2dEZvQkl5MmVNY2J4UUl4emxRcStGNURnK0xFbGtsQmpUSk50c3RsL1Njdk9JdTFRV1laT0RIYgpiR0wzL2Nwd1c0UTJYOVUybWFQZ3hVTzQ3V0h2bTVMWC9JSnpqVG1ybTJoVnlsYTNKKzBXcTlsK3JWdlFkTlgxCnFFMnA1dm1RenZ4Ujl6NC9PcWN5VTFHWklyMW5HNmRMR3J2Zjh6WnFjL0c5WUNEU2F6emN5UVJKOUw2WEJjL04KWWZlOU1IM2o3ZnJ0aW9TTEEwRlBtTnZpeG5LWVd5bCt0NEhlbVpBQkM5VDdTdVZIYXExZ1J6M2dHa0pwLy9iSAowTi92Uk1laERyZFRRTTdLMHIxUjJzcTIyRW9nMUdlUWN4TDViNXdJc1FLQmdRRG5EcFkxOUt5akpZdGExNXZqCi8zL2NjYXFuSWw1UnNEcVdaczl6cmRuVlRjOTZuMDYxOUxLSW5IdjAwOXlpRUU1QkhjWGxQUUM0cjlZTUhyeUEKNms4c3A3MUttTTliMklXNU9UbWhQZUJCMW9XQi9VWDd2UGpIMmJ2dHcyUFIvZEVoWStCU3puTXRMLytzdGdsKwpJMTV4QVF1UGlNc1AyT1c4eWFOT3c4VUVoUUtCZ1FEUFc0bE8ybi9NMWVjQ0NiZUI5T3FGZ1BOV00yY3o4RFZGCmx4d0FCSSsrb1NsWFpoTU9sWkhaemk3MjBtcnFmbDVBL1ZrSHU5K3pDQUNNamhXSHVLZkxtczVHUXZLK2svcisKdGRSbGx4WnNVck1ydHJ1RXlyclIwRnBjRlA5aG9DOVhXTDNCa01CV1lVeHFmVVFxMDUrLzk0azNTV01UMkp1dgpaNnljSkROdEJRS0JnUUN4RzdwQ000RmRNUHNucjl0Ym9jNGxjSzlwbTJ1RzNEbWNiY1FZbktzNzJIL3dNMHJICktJRHRQRjI3cGVZYUI3dWtLQ2szOVZHblA0a29FeXRVK2NXa3FoTHJxa1JQMTZGeEFBOVByRGxJM2lIS0tSVEsKeU9nOWNJV2YwOFNoQXhpWnFwQVppUXc2RisrNE9IVUFUaVluSXJEMDNkc2hFNVhONXhXWjIzQWFiUUtCZ0ZnNwozQ2FZcFU4VktoSmM3aUEzaGwrK3FremczS1ptTFZUcVl2akMrQ09tMGorbGFMQ0pCcUlHc1VkSDdFVFI5dXR5Cm9xSysyQWFIZml4US9XcGVNZEJhbERHanBVVmhGS216MTZoTzdUUzAwQmJtejg1R3NjNDcrV2M3YkJ3dm5GVnYKcG5jcVVCMnhrMkd3NGdQVFB5UGhnaHJyZUdSbWhJRFQvY2dIUTNhOUFvR0FScXYzZ200SlJKOUtETEVnMzBNMwpUc0ZPQlc4RUNQVmwwSHJxWkdLbzdmK2gza08zZXg5RVYxcTRRTm5TUjI0SXJORklWNVdjZWNwSXZ6NnBpazBYCkNmMFA3aTFycTV0eHE4VXArSTNVQXBmRUJrT0JBK2VaSyt6dTJnMjVYV3pwY2RUTm9Id1crQjVCTlBvOFVNNTcKZWlLdXhwQ0RlOXIrb3Azemg2RHZ0S1k9Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K
+  ---
+addons_include:
+- https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml
+system_images:
+  etcd: rancher/coreos-etcd:v3.4.3-rancher1
+  alpine: rancher/rke-tools:v0.1.72
+  nginx_proxy: rancher/rke-tools:v0.1.72
+  cert_downloader: rancher/rke-tools:v0.1.72
+  kubernetes_services_sidecar: rancher/rke-tools:v0.1.72
+  kubedns: rancher/k8s-dns-kube-dns:1.15.2
+  dnsmasq: rancher/k8s-dns-dnsmasq-nanny:1.15.2
+  kubedns_sidecar: rancher/k8s-dns-sidecar:1.15.2
+  kubedns_autoscaler: rancher/cluster-proportional-autoscaler:1.7.1
+  coredns: rancher/coredns-coredns:1.6.9
+  coredns_autoscaler: rancher/cluster-proportional-autoscaler:1.7.1
+  nodelocal: rancher/k8s-dns-node-cache:1.15.7
+  kubernetes: rancher/hyperkube:v1.18.16-rancher1
+  flannel: rancher/coreos-flannel:v0.12.0
+  flannel_cni: rancher/flannel-cni:v0.3.0-rancher6
+  calico_node: rancher/calico-node:v3.13.4
+  calico_cni: rancher/calico-cni:v3.13.4
+  calico_controllers: rancher/calico-kube-controllers:v3.13.4
+  calico_ctl: rancher/calico-ctl:v3.13.4
+  calico_flexvol: rancher/calico-pod2daemon-flexvol:v3.13.4
+  canal_node: rancher/calico-node:v3.13.4
+  canal_cni: rancher/calico-cni:v3.13.4
+  canal_flannel: rancher/coreos-flannel:v0.12.0
+  canal_flexvol: rancher/calico-pod2daemon-flexvol:v3.13.4
+  weave_node: weaveworks/weave-kube:2.6.4
+  weave_cni: weaveworks/weave-npc:2.6.4
+  pod_infra_container: rancher/pause:3.1
+  ingress: rancher/nginx-ingress-controller:nginx-0.35.0-rancher2
+  ingress_backend: rancher/nginx-ingress-controller-defaultbackend:1.5-rancher1
+  metrics_server: rancher/metrics-server:v0.3.6
+ssh_key_path: ~/.ssh/id_rsa
+ssh_cert_path: ""
+ssh_agent_auth: false
+authorization:
+  mode: rbac
+  options: {}
+ignore_docker_version: false
+kubernetes_version: ""
+private_registries: []
+ingress:
+  provider: "nginx"
+  options:
+    proxy-buffer-size: 128k
+    proxy-buffering: 'off'
+    proxy-buffers: 4 256k
+    proxy-busy-buffers-size: 256k
+    proxy-read-timeout: "300"
+    use-forwarded-headers: "true"
+  node_selector: {}
+  extra_args:
+    default-ssl-certificate: "ingress-nginx/ingress-default-cert"
+cluster_name: ""
+cloud_provider:
+  name: ""
+prefix_path: ""
+addon_job_timeout: 0
+bastion_host:
+  address: ""
+  port: ""
+  user: ""
+  ssh_key: ""
+  ssh_key_path: ""
+  ssh_cert: ""
+  ssh_cert_path: ""
+monitoring:
+  provider: ""
+  options: {}
+restore:
+  restore: false
+  snapshot_name: ""
+dns: null
